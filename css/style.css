@@ -21,6 +21,9 @@
   --color-warning:       #f59e0b;
   --color-warning-bg:    rgba(245, 158, 11, 0.10);
   --color-success:       #10b981;
+  --color-income:        #10b981;
+  --color-income-bg:     rgba(16, 185, 129, 0.10);
+  --color-expense:       #ef4444;
   --color-text:          #1e293b;
   --color-text-muted:    #64748b;
   --color-border:        #e2e8f0;
@@ -46,6 +49,9 @@
   --color-warning:       #fbbf24;
   --color-warning-bg:    rgba(251, 191, 36, 0.12);
   --color-success:       #34d399;
+  --color-income:        #34d399;
+  --color-income-bg:     rgba(52, 211, 153, 0.12);
+  --color-expense:       #f87171;
   --color-text:          #f1f5f9;
   --color-text-muted:    #94a3b8;
   --color-border:        #334155;
@@ -134,13 +140,18 @@ body {
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255,255,255,0.3);
   border-radius: var(--radius);
-  padding: 14px 28px;
+  padding: 14px 20px;
   text-align: center;
-  min-width: 140px;
+  min-width: 120px;
+  flex: 1;
 }
 
+.income-card  { border-color: rgba(16,185,129,0.5); }
+.expense-card { border-color: rgba(239,68,68,0.5); }
+.net-card     { border-color: rgba(255,255,255,0.4); }
+
 .balance-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   opacity: 0.85;
@@ -148,10 +159,13 @@ body {
 }
 
 .balance-amount {
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: -0.5px;
 }
+
+.income-amount  { color: #a7f3d0; }
+.expense-amount { color: #fca5a5; }
 
 .limit-status {
   font-size: 0.72rem;
@@ -721,6 +735,220 @@ body {
 @media (min-width: 600px) {
   .header { padding: 28px 24px 44px; }
   .app-title { font-size: 1.6rem; }
-  .balance-amount { font-size: 2rem; }
+  .balance-amount { font-size: 1.6rem; }
   .container { margin-top: -26px; }
+}
+
+/* ============================================================
+   Transaction Type Toggle
+   ============================================================ */
+.type-toggle-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.type-btn.expense-btn.active {
+  border-color: var(--color-expense);
+  background: var(--color-danger-bg);
+  color: var(--color-expense);
+}
+
+.type-btn.income-btn.active {
+  border-color: var(--color-income);
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.btn-primary.btn-income {
+  background: var(--color-income);
+}
+.btn-primary.btn-income:hover {
+  background: #059669;
+}
+
+/* ============================================================
+   Category Type Tabs (manage panel)
+   ============================================================ */
+.cat-type-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cat-tab {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cat-tab[data-cattype="expense"].active {
+  border-color: var(--color-expense);
+  background: var(--color-danger-bg);
+  color: var(--color-expense);
+}
+
+.cat-tab[data-cattype="income"].active {
+  border-color: var(--color-income);
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+/* ============================================================
+   Chart Tabs
+   ============================================================ */
+.chart-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 16px 20px 0;
+}
+
+.chart-tab {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.chart-tab[data-chart="expense"].active {
+  border-color: var(--color-expense);
+  background: var(--color-danger-bg);
+  color: var(--color-expense);
+}
+
+.chart-tab[data-chart="income"].active {
+  border-color: var(--color-income);
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+/* ============================================================
+   Monthly Summary — Stat Cards
+   ============================================================ */
+.summary-stat-cards {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.summary-stat-card {
+  flex: 1;
+  min-width: 90px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-alt);
+  text-align: center;
+}
+
+.summary-stat-card.income  { border-color: var(--color-income);  background: var(--color-income-bg); }
+.summary-stat-card.expense { border-color: var(--color-expense); background: var(--color-danger-bg); }
+.summary-stat-card.net     { border-color: var(--color-primary); }
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.income-val  { color: var(--color-income); }
+.expense-val { color: var(--color-expense); }
+
+/* ============================================================
+   Monthly Summary — Section Labels
+   ============================================================ */
+.summary-section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  margin: 10px 0 6px;
+}
+
+.summary-section-label.income-label {
+  background: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.summary-section-label.expense-label {
+  background: var(--color-danger-bg);
+  color: var(--color-expense);
+}
+
+/* ============================================================
+   Transaction List — Filter Row
+   ============================================================ */
+.list-filter-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 5px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 99px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(99,102,241,0.08);
+}
+
+/* ============================================================
+   Transaction Item — Income variant
+   ============================================================ */
+.transaction-item.income-item {
+  border-color: rgba(16,185,129,0.3);
+}
+
+.item-amount.income-amount {
+  color: var(--color-income);
+}
+
+.item-amount.expense-amount {
+  color: var(--color-danger);
 }
