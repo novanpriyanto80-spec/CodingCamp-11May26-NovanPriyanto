@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense & Budget Visualizer</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <header class="header">
+      <div class="header-top">
+        <h1 class="app-title">💰 Budget Tracker</h1>
+        <button class="btn-theme" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+
+      <div class="balance-row">
+        <div class="balance-card">
+          <p class="balance-label">Total Spent</p>
+          <p class="balance-amount" id="totalBalance">Rp 0</p>
+        </div>
+        <div class="balance-card limit-card" id="limitCard" style="display:none">
+          <p class="balance-label">Monthly Limit</p>
+          <p class="balance-amount" id="limitDisplay">Rp 0</p>
+          <p class="limit-status" id="limitStatus"></p>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- ── Add Transaction ──────────────────────────────── -->
+      <section class="card" id="formSection">
+        <h2 class="section-title">Add Transaction</h2>
+        <form id="transactionForm" novalidate>
+
+          <div class="form-group">
+            <label for="itemName">Item Name</label>
+            <input type="text" id="itemName" placeholder="e.g. Lunch, Bus ticket…" autocomplete="off" />
+            <span class="error-msg" id="nameError">Please enter an item name.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Amount (Rp)</label>
+            <input type="number" id="amount" placeholder="e.g. 25000" min="1" />
+            <span class="error-msg" id="amountError">Please enter a valid amount.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category">
+              <option value="">-- Select category --</option>
+            </select>
+            <span class="error-msg" id="categoryError">Please select a category.</span>
+          </div>
+
+          <button type="submit" class="btn-primary">+ Add Transaction</button>
+        </form>
+      </section>
+
+      <!-- ── Manage Categories ────────────────────────────── -->
+      <section class="card" id="categorySection">
+        <button class="collapsible-header" id="categoryToggle" aria-expanded="false">
+          <h2 class="section-title no-border">🏷️ Manage Categories</h2>
+          <span class="chevron">▼</span>
+        </button>
+        <div class="collapsible-body" id="categoryBody">
+          <div class="category-chips" id="categoryChips"></div>
+
+          <div class="add-category-form">
+            <input type="text" id="newCatEmoji" placeholder="😀" maxlength="2" class="emoji-input" />
+            <input type="text" id="newCatName"  placeholder="Category name" autocomplete="off" />
+            <input type="color" id="newCatColor" value="#10b981" class="color-input" title="Pick a color" />
+            <button type="button" class="btn-secondary" id="addCategoryBtn">Add</button>
+          </div>
+          <span class="error-msg" id="catFormError" style="margin-top:4px"></span>
+        </div>
+      </section>
+
+      <!-- ── Spend Limit ──────────────────────────────────── -->
+      <section class="card" id="limitSection">
+        <button class="collapsible-header" id="limitToggle" aria-expanded="false">
+          <h2 class="section-title no-border">⚠️ Monthly Spend Limit</h2>
+          <span class="chevron">▼</span>
+        </button>
+        <div class="collapsible-body" id="limitBody">
+          <div class="limit-form">
+            <input type="number" id="limitInput" placeholder="e.g. 500000" min="0" />
+            <button type="button" class="btn-secondary" id="setLimitBtn">Set Limit</button>
+            <button type="button" class="btn-ghost"    id="clearLimitBtn">Clear</button>
+          </div>
+          <p class="hint-text">Transactions that push your monthly total over the limit will be highlighted.</p>
+        </div>
+      </section>
+
+      <!-- ── Monthly Summary ──────────────────────────────── -->
+      <section class="card" id="summarySection">
+        <button class="collapsible-header" id="summaryToggle" aria-expanded="false">
+          <h2 class="section-title no-border">📅 Monthly Summary</h2>
+          <span class="chevron">▼</span>
+        </button>
+        <div class="collapsible-body" id="summaryBody">
+          <div class="summary-controls">
+            <button class="btn-icon" id="prevMonth" aria-label="Previous month">‹</button>
+            <span class="month-label" id="monthLabel"></span>
+            <button class="btn-icon" id="nextMonth" aria-label="Next month">›</button>
+          </div>
+          <div class="summary-total">
+            Total: <strong id="summaryTotal">Rp 0</strong>
+          </div>
+          <ul class="summary-list" id="summaryList"></ul>
+          <p class="list-empty" id="summaryEmpty">No transactions this month.</p>
+        </div>
+      </section>
+
+      <!-- ── Chart ────────────────────────────────────────── -->
+      <section class="card" id="chartSection">
+        <h2 class="section-title">Spending by Category</h2>
+        <div class="chart-wrapper">
+          <canvas id="spendingChart"></canvas>
+          <p class="chart-empty" id="chartEmpty">No data yet. Add a transaction to see the chart.</p>
+        </div>
+      </section>
+
+      <!-- ── Transaction List ─────────────────────────────── -->
+      <section class="card" id="listSection">
+        <div class="list-header">
+          <h2 class="section-title no-border">Transaction History</h2>
+          <div class="sort-controls">
+            <label for="sortSelect" class="sr-only">Sort by</label>
+            <select id="sortSelect" class="sort-select">
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="amount-desc">Amount ↓</option>
+              <option value="amount-asc">Amount ↑</option>
+              <option value="category-asc">Category A–Z</option>
+            </select>
+          </div>
+        </div>
+        <ul class="transaction-list" id="transactionList"></ul>
+        <p class="list-empty" id="listEmpty">No transactions yet.</p>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <p>Data saved locally in your browser.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
